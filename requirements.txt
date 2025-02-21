@@ -1,5 +1,0 @@
-Flask
-pandas
-pdfplumber
-scikit-learn
-joblib
