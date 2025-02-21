@@ -1,0 +1,7 @@
+Flask
+pandas
+pdfplumber
+scikit-learn
+joblib
+gunicorn
+waitress  
