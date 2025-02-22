@@ -3,8 +3,11 @@ import pandas as pd
 import os
 from datetime import datetime
 from bank_statement_analyzer_module import BankStatementAnalyzer, process_manual_entry
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, origins=["http://localhost:4200"])
+
 analyzer = BankStatementAnalyzer()
 
 def parse_date(date_str):
@@ -17,7 +20,7 @@ def parse_date(date_str):
 
 @app.route('/')
 def home():
-    return "Bank Statement Analyzer API is running!"
+    return jsonify({"message": "Bank Statement Analyzer API is running!"})
 
 @app.route('/upload_pdf', methods=['POST'])
 def upload_pdf():
@@ -64,3 +67,5 @@ def manual_entry():
 if __name__ == '__main__':
     from waitress import serve
     serve(app, host='0.0.0.0', port=5000)
+    #app.run(host='0.0.0.0', port=5000, debug=True)
+
