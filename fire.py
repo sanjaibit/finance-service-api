@@ -10,7 +10,7 @@ from bank_statement_analyzer_module import BankStatementAnalyzer
 
 # Initialize Flask App
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:4200"])
+CORS(app, origins=["http://localhost:4200","https://finance-app-weld-delta.vercel.app"])
 
 # MongoDB Atlas Connection
 MONGO_URI = "mongodb+srv://sanjaiad22:pass@finance-app.ukuqp.mongodb.net/?retryWrites=true&w=majority&appName=finance-app"
