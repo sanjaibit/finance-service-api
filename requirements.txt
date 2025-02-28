@@ -6,3 +6,5 @@ joblib
 gunicorn
 waitress  
 Flask-CORS
+pymongo
+werkzeug
