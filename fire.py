@@ -192,7 +192,6 @@ def update_expense():
 @app.route('/analyze_spending', methods=['GET'])
 def analyze_spending():
     transactions = list(expenses_collection.find({}, {'_id': 0}))
-
     if not transactions:
         return jsonify({"error": "No transactions available for analysis"}), 400
 
