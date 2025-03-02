@@ -51,6 +51,8 @@ class BankStatementAnalyzer:
                 transfer_index = parts.index("Transfer")
 
                 description = " ".join(parts[1:transfer_index])
+                
+                category = self.classify_transaction(description)
 
                 # Handling separate '-' before amount
                 #if parts[transfer_index + 1] == "-":
@@ -69,6 +71,7 @@ class BankStatementAnalyzer:
                     "Date": date,
                     "Description": description,
                     "Type": trans_type,
+                    "Category": category,
                     "Amount": amount,
                     "Balance": balance
                 })
@@ -105,28 +108,47 @@ class BankStatementAnalyzer:
                     return category
             return 'OTHERS'
 
-    def analyze_spending_patterns(self, df):
+    def analyze_spending_patterns(self, transactions):
+        df = pd.DataFrame(transactions)
+
+        # Ensure required columns exist before applying operations
+        if 'Description' not in df.columns or 'Amount' not in df.columns or 'Date' not in df.columns:
+            return {"error": "Missing required fields in transaction data"}
+
+        # Convert 'Date' to datetime format for proper grouping
+        df['Date'] = pd.to_datetime(df['Date'])
+
+        # Apply category classification
         df['Category'] = df['Description'].apply(self.classify_transaction)
+
+        # Filter transactions with amount >= 50
         filtered_df = df[df['Amount'] >= 50]
-        
+
+        # Group by both Category and Month
+        category_monthly_spending = df.groupby([df['Date'].dt.strftime('%Y-%m'), 'Category'])['Amount'].sum().unstack().fillna(0).to_dict()
+
+        # Analyze spending patterns
         analysis = {
             'category_totals': df.groupby('Category')['Amount'].sum().to_dict(),
             'monthly_spending': df.groupby(df['Date'].dt.strftime('%Y-%m'))['Amount'].sum().to_dict(),
+            'category_monthly_spending': category_monthly_spending,  # Added category-wise monthly spending
             'largest_transactions': filtered_df.nlargest(5, 'Amount')[['Date', 'Description', 'Amount', 'Category']].to_dict('records')
         }
-        
+
         return analysis
     
     def generate_suggestions(self, analysis):
         suggestions = []
         category_spending = {k: abs(v) for k, v in analysis['category_totals'].items()}
+        print(category_spending)
         total_spend = sum(category_spending.values())
 
         if total_spend > 0:
             for category, amount in category_spending.items():
                 percentage = (amount / total_spend) * 100
+                print(f"{amount} {percentage}")
 
-                if category == 'FOOD' and percentage > 30:
+                if category == 'FOOD' and percentage > 1:
                     suggestions.append(f"Your food expenses ({percentage:.1f}%) are high. Consider meal planning.")
 
                 elif category == 'ENTERTAINMENT' and percentage > 15:
